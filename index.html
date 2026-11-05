@@ -187,6 +187,10 @@
   .r-head{padding:22px 24px 18px;background:var(--green-soft)}
   .r-head h2{font-size:1.6rem;margin-top:6px}
   .bar-right{display:flex;align-items:center;gap:10px}
+  .ctrlbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+  /* Sticks to the top of the quote column so it stays by the number it governs. */
+  .ctrlslot:not(:empty){position:sticky;top:0;z-index:3;background:var(--page);
+    padding-bottom:10px;margin-bottom:-2px}
   .themebtn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;
     flex:none;border:1.5px solid var(--hair-2);border-radius:999px;background:var(--wash-2);
     color:var(--black);cursor:pointer;padding:0}
@@ -356,7 +360,8 @@
 <span class="toolname">WhatsApp cost estimator</span>
 <span class="regionpill">Singapore</span>
 </div>
-    <div class="bar-right">
+    <div class="bar-right" id="barRight">
+      <div class="ctrlbar" id="ctrlBar">
       <button type="button" class="themebtn" id="themeBtn" aria-pressed="false" title="Dark mode">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="i-sun">
           <circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7"/></svg>
@@ -371,6 +376,7 @@
         <select id="langPick"></select>
       </div>
       <div class="cycle" id="cycleBar" role="group" aria-label="Billing cycle"></div>
+      </div>
     </div>
 </div>
 </div>
@@ -579,6 +585,7 @@
 </section>
 </form>
 <aside aria-label="Cost estimate" class="rcol">
+<div class="ctrlslot" id="ctrlSlot"></div>
 <div class="receipt">
 <div class="r-head">
 <div class="r-top">
@@ -1517,6 +1524,20 @@
     });
   })();
   $("needVoice").addEventListener("change", function(){ state.needVoice = this.checked; render(); });
+
+  // The controls live beside the quote on a wide screen and in the top bar on a
+  // narrow one, where there is no second column to sit above.
+  (function(){
+    var bar = $("ctrlBar"), slot = $("ctrlSlot"), top = $("barRight");
+    var wide = window.matchMedia("(min-width: 981px)");
+    function place(){
+      var host = wide.matches ? slot : top;
+      if (bar.parentNode !== host) host.appendChild(bar);
+    }
+    place();
+    if (wide.addEventListener) wide.addEventListener("change", place);
+    else if (wide.addListener) wide.addListener(place);
+  })();
 
   (function(){
     var btn = $("themeBtn"), root = document.documentElement;
