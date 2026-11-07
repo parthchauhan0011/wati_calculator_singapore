@@ -91,7 +91,50 @@
   @media (max-width:980px){ .split{grid-template-columns:minmax(0,1fr);gap:30px} }
 
   /* questions */
-  .q{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:24px 24px 26px;margin-bottom:14px}
+  .q{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:20px 22px 22px;margin:0}
+
+  /* Two-up where the content allows, so the form is a screen or two, not six. */
+  #form{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+  #form > .q{grid-column:1/-1}
+  #form > .q.half{grid-column:span 1}
+  .vgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+  .ao-grid{display:grid;grid-template-columns:1fr;gap:0 28px}
+  :root[data-detail="off"] .ao-grid{grid-template-columns:1fr}
+  /* One line per add-on in the compact view: name, help link, quantity. */
+  :root[data-detail="off"] .ao-grid .field{margin-bottom:7px}
+  :root[data-detail="off"] .ao-grid .check{padding:6px 0}
+  :root[data-detail="off"] .ao-grid .field-label.stack{flex-direction:row;align-items:center;
+    gap:9px;max-width:none}
+  .ao-grid .check > div{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:9px}
+  .ao-grid .check > div .hint{flex-basis:100%}
+  :root[data-detail="off"] .rc-file{display:none}
+  .ao-link{font-size:.8rem;font-weight:500;color:var(--muted);white-space:nowrap;
+    text-decoration:underline;text-decoration-color:var(--green);text-underline-offset:3px}
+  .ao-link:hover{color:var(--black)}
+  .ao-grid .check{border-top:0;padding:9px 0}
+  @media (max-width:1180px){
+    #form{grid-template-columns:1fr}
+    #form > .q.half{grid-column:1/-1}
+    .vgrid,.ao-grid{grid-template-columns:1fr}
+  }
+
+  /* Details off is the working view: prose hidden, rhythm tightened. */
+  :root[data-detail="off"] .q-note,
+  :root[data-detail="off"] .aibox,
+  :root[data-detail="off"] .freebox,
+  :root[data-detail="off"] .scale,
+  :root[data-detail="off"] .hint.ex,
+  :root[data-detail="off"] .notes,
+  :root[data-detail="off"] .chan-n{display:none}
+  :root[data-detail="off"] .lede{display:none}
+  :root[data-detail="off"] .masthead h1{font-size:clamp(1.6rem,3.2vw,2.3rem);max-width:30ch}
+  :root[data-detail="off"] .masthead{padding-top:26px;padding-bottom:4px}
+  :root[data-detail="off"] .channels{margin-top:16px}
+  :root[data-detail="off"] .q{padding:15px 20px 17px}
+  :root[data-detail="off"] .field{margin-bottom:13px}
+  :root[data-detail="off"] .s-head{margin-bottom:12px}
+  :root[data-detail="off"] .freebox{padding:13px 16px}
+  :root[data-detail="off"] .chan-in{padding:11px 16px}
   .q-head{display:flex;align-items:center;gap:11px;margin-bottom:7px}
   .q-num{width:24px;height:24px;border-radius:50%;background:var(--green);color:var(--on-brand);
     font-size:12px;font-weight:700;display:grid;place-items:center;flex:none}
@@ -106,7 +149,7 @@
   .chip:hover{border-color:var(--green)}
   .chip:focus-visible{outline:2px solid var(--black);outline-offset:2px}
 
-  .field{margin-bottom:22px}
+  .field{margin-bottom:17px}
   .field:last-child{margin-bottom:0}
   .field-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px}
   .field-label{font-weight:500;font-size:.97rem;display:flex;align-items:center;gap:9px}
@@ -421,6 +464,10 @@
     try { t = localStorage.getItem("wati-theme"); } catch(e){}
     // Light is the default everywhere; dark is opt-in and remembered per browser.
     document.documentElement.setAttribute("data-theme", t === "dark" ? "dark" : "light");
+    // Details off is the default: the compact view an AE uses on a call.
+    var d = null;
+    try { d = localStorage.getItem("wati-detail"); } catch(e){}
+    document.documentElement.setAttribute("data-detail", d === "on" ? "on" : "off");
   })();
 </script>
 </head>
@@ -446,6 +493,16 @@
       <div class="ctrl" id="langBox" hidden>
         <label class="ctrl-l" for="langPick" data-i18n="ctrlLang">Language</label>
         <div class="selwrap"><select id="langPick"></select></div>
+      </div>
+      <div class="ctrl">
+        <span class="ctrl-l" data-i18n="ctrlDetail">Details</span>
+        <button type="button" class="switch" id="detailBtn" role="switch" aria-checked="false">
+          <span class="knob">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M5 7.5h14M5 12h14M5 16.5h9"/></svg>
+          </span>
+          <span class="sr" data-i18n="srDetail">Show the explanatory notes</span>
+        </button>
       </div>
       <div class="ctrl">
         <span class="ctrl-l" data-i18n="ctrlTheme">Dark mode</span>
@@ -510,7 +567,7 @@
 <button aria-pressed="true" class="chip" data-i18n="t009" data-usecase="mixed" type="button">A mix of all of it</button>
 </div>
 </section>
-<section class="q">
+<section class="q half">
 <div class="q-head"><span class="q-num">3</span><h2 data-i18n="t010">How many WhatsApp numbers?</h2></div>
 <p class="q-note" data-i18n="t011">One number suits most businesses. Separate numbers need Business, and each extra is billed monthly.</p>
 <div class="field">
@@ -524,7 +581,7 @@
 <div class="scale"><span>1</span><span>5</span><span>10+</span></div>
 </div>
 </section>
-<section class="q">
+<section class="q half">
 <div class="q-head"><span class="q-num">4</span><h2 data-i18n="t013">How many people need a login?</h2></div>
 <p class="q-note" data-i18n="t014">Everyone answering chats needs a seat. Growth includes 3 and cannot be topped up at any price.</p>
 <div class="field">
@@ -541,6 +598,7 @@
 <section class="q">
 <div class="q-head"><span class="q-num">5</span><h2 data-i18n="t016">How many messages a month?</h2></div>
 <p class="q-note" data-i18n="t017">WhatsApp bills per delivered message by category, not per contact. Split your monthly volume across the three that cost money.</p>
+<div class="vgrid">
 <div class="field">
 <div class="field-top">
 <span class="field-label" data-i18n="t018"><i class="dot d-mkt"></i>Marketing<span class="sr" data-i18n="srMsgs"> messages per month</span></span>
@@ -571,12 +629,13 @@
 <div class="field">
 <div class="field-top">
 <span class="field-label stack" data-i18n="t024">Service messages a month
-            <span class="hint" data-i18n="t025">Free-form replies you send inside the 24-hour window. Billable per message from 1 Oct 2026, after the first 1,000 a month. Inbound is always free. <a data-i18n="t026" href="https://support.wati.io/en/articles/16954666-whatsapp-business-platform-api-pricing-changes-service-messages-and-click-to-message-ads" rel="noopener" target="_blank">What changed</a></span>
+            <span class="hint ex" data-i18n="t025">Free-form replies you send inside the 24-hour window. Billable per message from 1 Oct 2026, after the first 1,000 a month. Inbound is always free. <a data-i18n="t026" href="https://support.wati.io/en/articles/16954666-whatsapp-business-platform-api-pricing-changes-service-messages-and-click-to-message-ads" rel="noopener" target="_blank">What changed</a></span>
 </span>
 <input aria-label="Service messages per month" class="num" id="svcNum" max="2000000" min="0" step="100" type="number" value="0"/>
 </div>
 <input aria-label="Service messages slider" id="svcRange" max="50000" min="0" step="100" type="range" value="0"/>
 <div class="scale"><span>0</span><span>25,000</span><span>50,000+</span></div>
+</div>
 </div>
 <div class="mix">
 <div class="mix-t"><span data-i18n="mixT">Your message mix</span><b id="mixTotal">—</b></div>
@@ -600,7 +659,7 @@
 <div class="field">
 <div class="field-top">
 <span class="field-label stack" data-i18n="t035">Automation triggers a month
-            <span class="hint" data-i18n="t036">Roughly one per customer who starts an automated chat, plus one per automated follow-up. API-initiated actions don't count.</span>
+            <span class="hint ex" data-i18n="t036">Roughly one per customer who starts an automated chat, plus one per automated follow-up. API-initiated actions don't count.</span>
 </span>
 <input aria-label="Automation triggers per month" class="num" id="trigNum" max="1000000" min="0" step="100" type="number" value="2000"/>
 </div>
@@ -615,7 +674,7 @@
 <div class="field">
 <div class="field-top">
 <span class="field-label stack" data-i18n="t039">Wati AI credits a month
-            <span class="hint" data-i18n="t040">One pool shared by Wati AI and Astra. Free each month: 2,000 Growth, 5,000 Pro, 20,000 Business. Leave at 0 if the team won't use AI.</span>
+            <span class="hint ex" data-i18n="t040">One pool shared by Wati AI and Astra. Free each month: 2,000 Growth, 5,000 Pro, 20,000 Business. Leave at 0 if the team won't use AI.</span>
 </span>
 <input aria-label="Wati AI credits per month" class="num" id="aiNum" max="500000" min="0" step="500" type="number" value="0"/>
 </div>
@@ -625,7 +684,7 @@
 <div class="field">
 <div class="field-top">
 <span class="field-label stack" data-i18n="agentsAi">Astra AI agents you need
-            <span class="hint" data-i18n="agentsAiHint">Growth 1, Pro 2, Business unlimited. Ask for more than the plan allows and it's ruled out.</span>
+            <span class="hint ex" data-i18n="agentsAiHint">Growth 1, Pro 2, Business unlimited. Ask for more than the plan allows and it's ruled out.</span>
 </span>
 <input aria-label="Astra AI agents" class="num" id="aiAgentNum" max="50" min="0" step="1" type="number" value="1"/>
 </div>
@@ -655,8 +714,6 @@
 <div><label data-i18n="shopify" for="needShopify">Connect Shopify</label>
 <span class="hint" data-i18n="shopifyHint">Needed for abandoned-cart, COD confirmation and automated order updates. $4.99 a month, billed in USD.</span></div>
 </div>
-</section>
-<section class="q">
 </section>
 </form>
 <aside aria-label="Cost estimate" class="rcol">
@@ -781,7 +838,7 @@
      English is always the fallback and is captured from the markup at load,
      so a missing key simply shows the English.
      ------------------------------------------------------------------ */
-  var LANGS = {"zh-Hans": {"agentsAi": "需要几个 Astra AI 智能体", "agentsAiHint": "Growth 1 个，Pro 2 个，Business 不限。超出方案允许即排除该方案。", "and": "和", "aoBilled": "按 5 人一档计费", "aoFree": "本方案已包含", "aoLearn": "这是什么", "ao_apihigh": "API 高并发", "ao_apihigh_h": "瞬时上限最高每 10 秒 200 次 API 调用。", "ao_apilimit": "提升 API 月度上限", "ao_apilimit_h": "API 月度调用上限最高 4,000 万次。", "ao_blitz": "Blitz——每秒 200 条消息", "ao_blitz_h": "群发速度最高每秒 200 条，适用于时效性强的发送。", "ao_byoa": "BYOA——接入自有 AI 智能体", "ao_byoa_h": "接入第三方 AI 智能体，按智能体计费。Astra 智能体随方案提供，此处不计费。", "ao_ctwa": "点击直达 WhatsApp 广告", "ao_ctwa_h": "Facebook 与 Instagram 广告的点击追踪与归因，含分析看板与 Google Ads。Pro 起免费。", "ao_forms": "表单", "ao_forms_h": "最多 25 个 WhatsApp 表单，用于预约、申请与线索收集。", "ao_masking": "手机号码脱敏", "ao_masking_h": "在收件箱中对客户号码脱敏，通常出于合规考虑。", "ao_opprivacy": "坐席隐私保护", "ao_opprivacy_h": "在沟通过程中对坐席隐藏客户联系方式。", "ao_opscope": "坐席可见范围", "ao_opscope_h": "每位坐席只看到分配给自己的会话，而非整个共享收件箱。", "ao_roundrobin": "轮询分配会话", "ao_roundrobin_h": "把来访会话平均分配给在线坐席。", "b029": "每月前 1,000 条服务类消息", "b030": "来自点击直达 WhatsApp 广告的会话。", "b031": "2026 年 10 月 1 日起调整：", "b042": "Astra 智能体随方案提供", "b043": "共用一个额度池。", "b044": "额度不结转。", "b045": "加购起步 2,000。", "billedIn": "实际结算", "ccyBilling": "结算货币", "chanInc": "所有方案包含，无额外平台费", "chanNote": "本测算器仅核算 WhatsApp。其他渠道共用同一收件箱、自动化与 Astra 智能体；RCS 与 SMS 费率请单独索取。", "chanPaid": "同样支持，按条计费", "copied": "已复制——粘贴到邮件即可", "copyFail": "复制失败", "ctrlCcy": "价格显示货币", "ctrlCycle": "计费周期", "ctrlLang": "语言", "ctrlTheme": "深色模式", "cycShown": "{0} · 以 {1} 显示", "cycSub_annual": "按年付费", "cycSub_monthly": "按月付费", "cycSub_quarterly": "按季付费", "cyc_annual": "按年", "cyc_monthly": "按月", "cyc_quarterly": "按季", "dg_addons": "附加功能", "dg_credits": "额外 Wati AI 额度", "dg_messages": "消息费用", "dg_numbers": "增购 WhatsApp 号码", "dg_plan": "方案费用", "dg_seats": "增购用户", "dg_triggers": "额外自动化触发", "discApplies": "适用于整个套餐——可单独修改下方任一行", "discEff": "占整单比例", "discLabel": "你可以给出的折扣", "discNet": "折后", "discOff": "让利", "discPerMonth": "每月", "discYear": "全年累计让利", "free": "免费", "fxAsOfDate": "2026 年 8 月 13 日", "fxBy": "汇率来自 {0}", "fxDated": "汇率日期 {0}", "fxLatest": "最新公布汇率", "fxLoading": "正在获取今日汇率…", "fxOffline": "无法获取实时汇率——正在使用 {0} 的参考汇率，请勿据此报价。", "fxRefresh": "刷新汇率", "grpAgent": "按 AI 智能体计费", "grpMonth": "按月固定费用", "grpRest": "其他国家和地区", "grpUser": "按用户计费，以 5 人为一档出售", "hintCountry": "{0} 方案下，发往{1}的营销类每条 {2}，实用类 {3}。切换国家，整单重新计价。", "hintNumber1": "一个号码，任何方案都支持。", "hintNumbers": "{0} 个号码：仅 Business 方案支持，首个之外每个每月另加 {1}。", "hintSeatsOk": "Growth 最多 3 个，Pro 与 Business 含 5 个。", "hintSeatsOver": "{0} 个坐席排除 Growth，它上限为 3。", "langLabel": "语言", "lede": "八个简短问题。账单随填写自动逐项列出，然后选择货币并导出 PDF。", "mixMsgs": "条/月", "mixNone": "在上方填入月发送量，构成图即显示在这里。", "mixSvc": "服务类", "mixT": "消息构成", "notesH": "这里的计算前提，供你核对。", "pAllIn": "每月总计", "pExtraSeats": "{0} 个额外坐席 {1}", "pMsgs": "消息 {0}，营销类单价 {1}", "pPlan": "方案 {0}", "pSeatsFixed": "含 {0} 个坐席，无法加购", "pSeatsInc": "含 {0} 个坐席", "pTrigOk": "{0} 次触发，够用", "pTrigTop": "触发加购 {0}（{1} 档）", "perAgent": "每个智能体", "perMonth": "每月", "perUser": "每用户", "q1note": "WhatsApp 按客户号码所属国家计费，而不是按你公司所在地。各市场费率差距很大，所以从这里开始。", "q7h": "AI、Astra 与额度", "q7n": "Astra 随所有方案提供。额度为一个共用池，超出部分按档位计价。", "q8h": "附加功能", "q8n": "价格直接取自本地区费率卡。按用户计费的附加功能以 5 人为一档，8 名坐席按 10 人计费。", "rAddon": "{0} 需要 {1} 及以上。", "rAgents1": "含 {0} 个 Astra 智能体，你需要 {1} 个。", "rAgentsN": "含 {0} 个 Astra 智能体，你需要 {1} 个。", "rAuth": "验证类消息", "rCap": "群发上限为每月 {0} 条，你的营销加实用类用量为 {1} 条。", "rCredits": "Wati AI 额度", "rExtraCredits": "额外 Wati AI 额度", "rExtraNumbers": "个增购 WhatsApp 号码", "rExtraTriggers": "额外自动化触发", "rExtraUsers": "个增购用户", "rMarketing": "营销类消息", "rMsgHead": "消息——从预付钱包扣除", "rMsgTotal": "钱包小计", "rNumbers": "仅支持一个 WhatsApp 号码，你需要 {0} 个。", "rPlan": "方案", "rSeats": "含 {0} 个坐席且无法加购，你需要 {1} 个。", "rService": "服务类消息", "rShopify": "Shopify 集成", "rSubHead": "订阅——按方案周期结算", "rSubTotal": "订阅小计", "rSvcFree": "服务类消息（免费额度内）", "rTriggers": "次触发", "rUsers": "用户", "rUtility": "实用类消息", "rVoice": "语音 AI 智能体仅限 Business。", "rcDate": "2026 年 10 月 1 日", "rcEffective": "自 {0} 起生效。", "rcFolder": "若链接打开的是文件夹，请按按钮上的文件名选择。", "rcHead": "这些数字背后的费率卡", "rnInr": "方案价格与单条费率均为印度卢比，无需换算。唯一例外是 Shopify 集成，按每月 4.99 美元计费。", "rnUsd": "费率卡上的单条费率以美元标示。若方案以其他货币结算，两者都会按今日汇率换算为上方所选货币。", "shopify": "接入 Shopify", "shopifyHint": "购物车挽回、货到付款确认与自动订单通知需要此项。每月 4.99 美元，按美元计费。", "srCountry": "你的客户所在国家", "srMsgs": "条/月", "svcLower": "服务类消息有各自的分国家费率，低于实用类。", "svcSame": "本费率卡的服务类消息按实用类费率计费。", "t001": "算清 WhatsApp 每月真正要花多少钱。", "t002": "你的客户在哪里？", "t003": "你用 WhatsApp 做什么？", "t004": "设定一组合理的起始数值，之后都可修改。", "t005": "促销与营销活动", "t006": "客户服务", "t007": "订单与物流通知", "t008": "登录与一次性验证码", "t009": "各种用途都有", "t010": "需要几个 WhatsApp 号码？", "t011": "多数企业一个号码就够。分设号码需要 Business，每增加一个按月收费。", "t012": "已接入 Wati 的号码数", "t013": "多少人需要账号？", "t014": "凡是回复会话的人都需要一个坐席。Growth 含 3 个，且无法加购。", "t015": "拥有 Wati 访问权限的成员", "t016": "每月多少条消息？", "t017": "WhatsApp 按送达消息的类别计费，不按联系人。把每月发送量分到三个收费类别。", "t018": "营销类", "t019": "优惠、新品、唤醒、购物车挽回。最贵的类别。", "t020": "实用类", "t021": "订单、物流、收款与预约提醒——一切与客户已完成交易相关的内容。", "t022": "验证类", "t023": "仅限一次性密码和登录验证码。", "t024": "每月服务类消息", "t025": "你方在 24 小时窗口内发出的自由格式回复。自 2026 年 10 月 1 日起，每月前 1,000 条之后按条计费。客户发来的始终免费。", "t026": "有哪些变化", "t027": "仍然不收费的部分", "t028": "客户发给你的任何内容都免费。", "t029": "，按每个 WhatsApp Business 账户计算，每月重置。", "t030": "目前免费。Meta 将把窗口延长至 7 天，日期待定。", "t031": "服务类消息改为按条计费，24 小时窗口内的实用类模板恢复计费。", "t032": "有多少流程是自动跑的？", "t033": "你设置的自动化每为一位客户触发一次即计一次：聊天机器人、关键词、路由规则、序列或 Flow。用完后自动化停止，直到你加购。超出部分按档位计价。", "t034": "触发次数如何计算与收费", "t035": "每月自动化触发次数", "t036": "大致为每位发起自动会话的客户一次，每条自动跟进再一次。API 发起的动作不计。", "t039": "每月 Wati AI 额度", "t040": "Wati AI 与 Astra 共用一个额度池。每月免费：Growth 2,000、Pro 5,000、Business 20,000。团队不用 AI 就保持 0。", "t041": "Astra 已包含在方案内，额度现已合并为一个池", "t042": "——Growth 1 个，Pro 2 个，Business 不限。语音 AI 仅限 Business。无需另行订阅 Astra。", "t043": "同一个余额覆盖 Wati AI 与 Astra。旧的 AI Co-pilot 额度已停用。", "t044": "在账单日失效并重置为方案额度。月中加购的也不结转。", "t045": "1,000 额度包已停售，每额度单价减半。", "t046": "套餐方案与 AI 额度的运作方式，含结转说明", "t047": "预计每月费用", "t048": "Wati Pro", "t049": "最佳匹配", "t050": "Growth", "t051": "Pro", "t052": "Business", "t053": "每月合计", "t054": "每条消息均价", "t055": "按年", "t056": "保存为 PDF", "t057": "复制为邮件", "t058": "同样的需求，三个方案分别计价", "t059": "把用户、加购与各方案消息费率算进去后，便宜的方案未必账单更便宜。", "t060": "方案、坐席与附加功能价格为官方公布数字。每条消息费率来自本地区费率卡，自 2026 年 10 月 1 日生效，按接收方国家计费。层级越高单条越便宜。", "t061": "费率卡链接在问题 1 下方——通话时打开原文，不要凭记忆报价。", "t062": "估算选出满足需求的最便宜方案。锁定某个方案可报更高层级；它承载不了的费用会从总额剔除并标注。", "t063": "Growth 的 15,000 条群发上限按营销加实用类核算。验证类由 API 一对一触发，不计入。", "t064": "方案含触发次数：1,000 / 2,000 / 5,000。超出按档位计价——支付覆盖所需的第一档。", "t065": "方案含 Wati AI 额度：2,000 / 5,000 / 20,000，Wati AI 与 Astra 共用。超出按档位计价且不结转。", "t066": "Astra 智能体随方案提供：1 / 2 / 不限，语音 AI 仅限 Business。并非单独订阅。", "t067": "增加号码需要 Business。Shopify 每月 4.99 美元，随汇率浮动。", "t068": "消息费用从预付钱包中扣除，与订阅发票分开结算。", "t069": "每月约一百万条以上的用量折扣未纳入模型。同样未计入：专属上线、技术客户经理、专业服务与绿勾认证。", "t070": "每月预计", "t071": "汇率取自 Frankfurter，备用为 Exchange Rate API。两者每日公布一次，因此为每日参考汇率而非成交汇率。Wati 以 结算；当日银行汇率会略有出入。", "tagNoFit": "不符合", "tagQuoting": "报价中", "toolname": "WhatsApp 成本测算器", "vCheapest": "<b>{0}</b> 是满足你需求的最便宜方案。", "vMsgShare": "消息占成本的 {0}%——订阅费只是小头。", "vNone": "标准方案都覆盖不了，需要单独报价。下面显示的是最接近的方案。", "vOut1": "{0} 被排除：{1}", "vOutMany": "{0} 被排除{1}。", "vPayg": "在这个用量下，{0} 可能比任何订阅都便宜，值得一看。", "vPinned": "你锁定了 <b>{0}</b>。", "vPinnedBest": "它也是符合条件里最便宜的。", "vPinnedLess": "符合条件里最便宜的是 <b>{0}</b>，{1}，所以这个每月便宜 {2}。", "vPinnedMore": "符合条件里最便宜的是 <b>{0}</b>，{1}，所以这个每月贵 {2}。", "vTierUp": "{0} 同样符合条件，但每月贵 {1}：它的单条费率更高，在这个用量下盖过了更低的方案费。", "voice": "我需要语音 AI 智能体", "voiceHint": "语音 AI 仅限 Business：勾选此项将排除 Growth 和 Pro。", "wbPlain": "实时汇率加载失败，总额使用了参考汇率。报价前请先在报价面板点击刷新汇率。", "wbUsd": "实时汇率加载失败。消息费按美元结算，总额使用了参考汇率。报价前请先在报价面板点击刷新汇率。", "whNote": "Growth 仅支持关键词规则。多步骤聊天机器人与 webhook 步骤自 Pro 起。", "regionNote": "新加坡以新元计费，采用大中华区用量费率卡。"}, "ms": {"agentsAi": "Ejen AI Astra yang anda perlukan", "agentsAiHint": "Growth 1, Pro 2, Business tanpa had. Minta lebih daripada yang dibenarkan pelan, pelan itu disingkirkan.", "and": "dan", "aoBilled": "dicaj dalam pek 5", "aoFree": "sudah termasuk dalam pelan ini", "aoLearn": "Apa fungsinya", "ao_apihigh": "API volum tinggi", "ao_apihigh_h": "Had lonjakan sehingga 200 panggilan API setiap 10 saat.", "ao_apilimit": "Kenaikan had API bulanan", "ao_apilimit_h": "Had API bulanan sehingga 40 juta panggilan.", "ao_blitz": "Blitz: 200 mesej sesaat", "ao_blitz_h": "Kelajuan hantar siaran sehingga 200 mesej sesaat, untuk penghantaran mendesak.", "ao_byoa": "BYOA — bawa ejen AI anda sendiri", "ao_byoa_h": "Sambungkan ejen AI pihak ketiga, dicaj setiap ejen. Ejen Astra disertakan dengan pelan dan tidak dicaj di sini.", "ao_ctwa": "Iklan Click-to-WhatsApp", "ao_ctwa_h": "Penjejakan dan atribusi klik iklan Facebook dan Instagram, dengan papan pemuka analitik dan Google Ads. Percuma mulai Pro.", "ao_forms": "Borang", "ao_forms_h": "Sehingga 25 borang WhatsApp untuk tempahan, permohonan dan penjanaan prospek.", "ao_masking": "Pelindungan nombor telefon", "ao_masking_h": "Melindungi nombor pelanggan dalam peti masuk. Biasanya atas sebab pematuhan.", "ao_opprivacy": "Privasi operator", "ao_opprivacy_h": "Menyembunyikan butiran hubungan pelanggan daripada operator semasa sembang.", "ao_opscope": "Skop operator", "ao_opscope_h": "Setiap operator melihat hanya sembang yang diberikan kepadanya, bukan seluruh peti masuk kongsi.", "ao_roundrobin": "Pemberian sembang bergilir", "ao_roundrobin_h": "Membahagikan sembang masuk sama rata kepada ejen yang ada.", "b029": "1,000 mesej perkhidmatan pertama sebulan", "b030": "Perbualan daripada iklan klik-ke-WhatsApp.", "b031": "Berubah pada 1 Oktober 2026:", "b042": "Ejen AI Astra disertakan dengan pelan", "b043": "Satu baki kredit.", "b044": "Kredit tidak dibawa ke hadapan.", "b045": "Tambah nilai bermula pada 2,000.", "billedIn": "dicaj dalam", "ccyBilling": "mata wang pengebilan", "chanInc": "Dalam setiap pelan, tanpa yuran platform tambahan", "chanNote": "Kalkulator ini mengira WhatsApp. Saluran lain berkongsi peti masuk, automasi dan ejen Astra yang sama — minta kadar RCS dan SMS secara berasingan.", "chanPaid": "Turut tersedia, dicaj setiap mesej", "copied": "Disalin — tampal ke e-mel anda", "copyFail": "Gagal menyalin", "ctrlCcy": "Tunjukkan harga dalam", "ctrlCycle": "Kitaran pengebilan", "ctrlLang": "Bahasa", "ctrlTheme": "Mod gelap", "cycShown": "{0} · dipaparkan dalam {1}", "cycSub_annual": "pelan dicaj tahunan", "cycSub_monthly": "pelan dicaj bulanan", "cycSub_quarterly": "pelan dicaj suku tahunan", "cyc_annual": "Tahunan", "cyc_monthly": "Bulanan", "cyc_quarterly": "Suku tahunan", "dg_addons": "Add-on", "dg_credits": "Kredit Wati AI tambahan", "dg_messages": "Mesej", "dg_numbers": "Nombor WhatsApp tambahan", "dg_plan": "Yuran pelan", "dg_seats": "Pengguna tambahan", "dg_triggers": "Pencetus tambahan", "discApplies": "untuk keseluruhan pakej — ubah mana-mana baris di bawah", "discEff": "daripada bil", "discLabel": "Diskaun yang boleh anda tawarkan", "discNet": "selepas diskaun", "discOff": "Anda lepaskan", "discPerMonth": "sebulan", "discYear": "dilepaskan sepanjang setahun", "free": "Percuma", "fxAsOfDate": "13 Ogos 2026", "fxBy": "kadar daripada {0}", "fxDated": "kadar bertarikh {0}", "fxLatest": "kadar terbitan terkini", "fxLoading": "Mendapatkan kadar tukaran hari ini…", "fxOffline": "Kadar langsung tiada — menggunakan kadar rujukan bertarikh {0}. Jangan beri sebut harga daripada ini.", "fxRefresh": "Muat semula kadar", "grpAgent": "Setiap ejen AI", "grpMonth": "Bulanan, yuran tetap", "grpRest": "Negara lain", "grpUser": "Setiap pengguna, dijual dalam pek lima", "hintCountry": "Pada {0}, mesej pemasaran ke {1} berharga {2} dan utility {3}. Tukar negara, seluruh bil dikira semula.", "hintNumber1": "Satu nombor. Mana-mana pelan boleh.", "hintNumbers": "{0} nombor: hanya pelan Business menyokongnya, tambah {1} sebulan bagi setiap satu selepas yang pertama.", "hintSeatsOk": "Growth sehingga 3. Pro dan Business merangkumi 5.", "hintSeatsOver": "{0} pengguna menyingkirkan Growth, yang hadnya 3.", "langLabel": "Bahasa", "lede": "Lapan soalan ringkas. Bil memperincikan dirinya sendiri, kemudian pilih mata wang dan simpan sebagai PDF.", "mixMsgs": "mesej sebulan", "mixNone": "Isi volum bulanan di atas dan campurannya muncul di sini.", "mixSvc": "Perkhidmatan", "mixT": "Campuran mesej anda", "notesH": "Apa yang diandaikan di sini, untuk anda semak.", "pAllIn": "sebulan, semua sekali", "pExtraSeats": "{0} pengguna tambahan {1}", "pMsgs": "Mesej {0}, pemasaran pada {1}", "pPlan": "Pelan {0}", "pSeatsFixed": "{0} pengguna disertakan, tidak boleh ditambah", "pSeatsInc": "{0} pengguna disertakan", "pTrigOk": "{0} pencetus, cukup untuk anda", "pTrigTop": "Tambah nilai pencetus {0} (lapisan {1})", "perAgent": "setiap ejen", "perMonth": "sebulan", "perUser": "setiap pengguna", "q1note": "WhatsApp mengecaj mengikut negara nombor pelanggan anda, bukan tempat perniagaan anda. Kadar berbeza jauh antara pasaran, jadi mulakan di sini.", "q7h": "AI, Astra dan kredit", "q7n": "Astra disertakan dengan setiap pelan. Kredit ialah satu baki dikongsi; lebihan dihargakan mengikut lapisan.", "q8h": "Add-on", "q8n": "Harga terus daripada kad kadar rantau ini. Add-on setiap pengguna dijual dalam pek lima, jadi 8 operator dicaj sebagai 10.", "rAddon": "{0} memerlukan {1} atau ke atas.", "rAgents1": "Disertakan {0} ejen Astra; anda minta {1}.", "rAgentsN": "Disertakan {0} ejen Astra; anda minta {1}.", "rAuth": "Mesej pengesahan", "rCap": "Siaran dihadkan {0} sebulan; volum pemasaran campur utility anda {1}.", "rCredits": "kredit Wati AI", "rExtraCredits": "Kredit Wati AI tambahan", "rExtraNumbers": "nombor WhatsApp tambahan", "rExtraTriggers": "Pencetus automasi tambahan", "rExtraUsers": "pengguna tambahan", "rMarketing": "Mesej marketing", "rMsgHead": "Mesej — daripada dompet prabayar anda", "rMsgTotal": "Subjumlah dompet", "rNumbers": "Menyokong satu nombor WhatsApp sahaja; anda perlukan {0}.", "rPlan": "pelan", "rSeats": "Merangkumi {0} pengguna tanpa cara menambah — anda perlukan {1}.", "rService": "Mesej perkhidmatan", "rShopify": "Integrasi Shopify", "rSubHead": "Langganan — dicaj pada kitaran pelan anda", "rSubTotal": "Subjumlah langganan", "rSvcFree": "Mesej perkhidmatan, kuota percuma", "rTriggers": "pencetus", "rUsers": "pengguna", "rUtility": "Mesej utility", "rVoice": "Ejen AI suara hanya pada Business.", "rcDate": "1 Oktober 2026", "rcEffective": "Berkuat kuasa {0}.", "rcFolder": "Jika pautan membuka folder, pilih fail yang dinamakan pada butang.", "rcHead": "Kad kadar di sebalik angka ini", "rnInr": "Harga pelan dan kadar setiap mesej kedua-duanya dalam INR, jadi tiada penukaran. Kecualinya integrasi Shopify, dibil $4.99 sebulan dalam USD.", "rnUsd": "Kadar setiap mesej pada kad kadar dinyatakan dalam USD. Jika pelan dibil dalam mata wang lain, kedua-duanya ditukar kepada mata wang yang dipilih di atas, pada kadar hari ini.", "shopify": "Sambungkan Shopify", "shopifyHint": "Perlu untuk troli terbiar, pengesahan COD dan makluman pesanan automatik. $4.99 sebulan dalam USD.", "srCountry": "Negara tempat pelanggan anda berada", "srMsgs": " mesej sebulan", "svcLower": "Mesej perkhidmatan mempunyai kadar tersendiri mengikut negara, lebih rendah daripada utility.", "svcSame": "Pada kad kadar ini mesej perkhidmatan dicaj pada kadar utility.", "t001": "Kira berapa kos sebenar WhatsApp setiap bulan.", "t002": "Di manakah pelanggan anda?", "t003": "Untuk apa anda guna WhatsApp?", "t004": "Menetapkan angka permulaan yang munasabah. Semuanya masih boleh diubah.", "t005": "Promosi dan kempen", "t006": "Sokongan pelanggan", "t007": "Makluman pesanan dan penghantaran", "t008": "Log masuk dan OTP", "t009": "Campuran semuanya", "t010": "Berapa nombor WhatsApp?", "t011": "Satu nombor memadai untuk kebanyakan perniagaan. Nombor berasingan perlukan Business, setiap tambahan dicaj bulanan.", "t012": "Nombor yang disambungkan ke Wati", "t013": "Berapa ramai yang perlukan akses?", "t014": "Semua yang menjawab sembang perlukan satu lesen. Growth merangkumi 3 dan tidak boleh ditambah pada apa jua harga.", "t015": "Ahli pasukan dengan akses Wati", "t016": "Berapa mesej sebulan?", "t017": "WhatsApp mengecaj setiap mesej dihantar mengikut kategori, bukan mengikut kenalan. Bahagikan volum bulanan kepada tiga kategori berkos.", "t018": "Marketing", "t019": "Tawaran, pelancaran, penglibatan semula, troli terbiar. Kategori paling mahal.", "t020": "Utility", "t021": "Makluman pesanan, penghantaran, bayaran dan temu janji — semua yang berkait transaksi yang sudah berlaku.", "t022": "Pengesahan", "t023": "Kata laluan sekali guna dan kod log masuk sahaja.", "t024": "Mesej perkhidmatan sebulan", "t025": "Balasan bebas yang anda hantar dalam tetingkap 24 jam. Dicaj setiap mesej mulai 1 Okt 2026, selepas 1,000 pertama sebulan. Mesej masuk sentiasa percuma.", "t026": "Apa yang berubah", "t027": "Apa yang masih tidak dicaj", "t028": "Apa sahaja yang pelanggan hantar kepada anda adalah percuma.", "t029": ", bagi setiap akaun WhatsApp Business, ditetapkan semula setiap bulan.", "t030": "Percuma buat masa ini. Meta akan memanjangkan tetingkap kepada 7 hari; tarikh menyusul.", "t031": "mesej perkhidmatan mula dicaj setiap mesej, dan templat utility dalam tetingkap 24 jam dicaj semula.", "t032": "Berapa banyak yang berjalan automatik?", "t033": "Dikira setiap kali automasi anda berjalan untuk seorang pelanggan: chatbot, kata kunci, peraturan penghalaan, jujukan atau Flow. Jika habis, automasi berhenti sehingga anda tambah nilai. Tambahan dihargakan mengikut lapisan.", "t034": "Cara pencetus dikira dan dicaj", "t035": "Pencetus automasi sebulan", "t036": "Lebih kurang satu bagi setiap pelanggan yang memulakan sembang automatik, tambah satu bagi setiap susulan automatik. Tindakan API tidak dikira.", "t039": "Kredit Wati AI sebulan", "t040": "Satu baki dikongsi Wati AI dan Astra. Percuma sebulan: 2,000 Growth, 5,000 Pro, 20,000 Business. Biar 0 jika pasukan tidak guna AI.", "t041": "Astra sudah termasuk, dan kredit kini satu baki", "t042": "— 1 pada Growth, 2 pada Pro, tanpa had pada Business. AI suara hanya Business. Tiada langganan Astra berasingan.", "t043": "satu baki menampung Wati AI dan Astra. Kredit AI Co-pilot lama telah ditamatkan.", "t044": "luput pada tarikh pengebilan dan kembali kepada jumlah pelan. Tambah nilai juga tidak dibawa ke hadapan.", "t045": "pakej 1,000 kredit sudah tiada dan harga setiap kredit turun separuh.", "t046": "Cara pelan bundel dan kredit AI berfungsi, termasuk baki terkumpul", "t047": "Anggaran kos bulanan", "t048": "Wati Pro", "t049": "Paling sesuai", "t050": "Growth", "t051": "Pro", "t052": "Business", "t053": "Jumlah sebulan", "t054": "Purata setiap mesej", "t055": "Tahunan", "t056": "Simpan sebagai PDF", "t057": "Salin untuk e-mel", "t058": "Keperluan yang sama, dihargakan pada ketiga-tiga pelan", "t059": "Pelan lebih murah tidak semestinya bil lebih murah setelah pengguna, tambah nilai dan kadar setiap pelan dikira.", "t060": "Harga pelan, lesen dan add-on ialah angka rasmi. Kadar setiap mesej daripada kad kadar rantau ini, berkuat kuasa 1 Oktober 2026, mengikut negara penerima. Peringkat lebih tinggi lebih murah setiap mesej.", "t061": "Kad kadar dipautkan di soalan 1 — buka sumbernya semasa panggilan, jangan memetik daripada ingatan.", "t062": "Anggaran memilih pelan termurah yang sesuai. Semat satu pelan untuk menawarkan lebih tinggi; yang tidak tertanggung dikeluarkan daripada jumlah dan ditandakan.", "t063": "Had 15,000 siaran Growth disemak terhadap marketing campur utility. Pengesahan dicetus API satu per satu dan tidak dikira.", "t064": "Pencetus disertakan: 1,000 / 2,000 / 5,000. Tambahan mengikut lapisan — anda bayar lapisan pertama yang menampung.", "t065": "Kredit Wati AI disertakan: 2,000 / 5,000 / 20,000, satu baki Wati AI dan Astra. Tambahan mengikut lapisan dan tidak dibawa ke hadapan.", "t066": "Ejen Astra disertakan dengan pelan: 1 / 2 / tanpa had, AI suara pada Business sahaja. Bukan langganan berasingan.", "t067": "Nombor tambahan perlukan Business. Shopify $4.99 sebulan dalam USD, jadi ia ikut kadar tukaran.", "t068": "Caj mesej diambil daripada dompet prabayar, berasingan daripada invois langganan.", "t069": "Diskaun volum melebihi kira-kira sejuta mesej sebulan tidak dimodelkan. Turut dikecualikan: onboarding khusus, pengurusan akaun teknikal, perkhidmatan profesional dan pengesahan tanda hijau.", "t070": "Anggaran bulanan", "t071": "Kadar tukaran daripada Frankfurter, sandarannya Exchange Rate API. Kedua-duanya terbit sekali sehari, jadi ini kadar rujukan harian, bukan kadar urus niaga. Wati mengebil dalam ; kadar bank anda pada hari itu akan berbeza sedikit.", "tagNoFit": "Tidak sesuai", "tagQuoting": "Disebut harga", "toolname": "Kalkulator kos WhatsApp", "vCheapest": "<b>{0}</b> ialah pelan termurah yang memenuhi keperluan anda.", "vMsgShare": "Mesej ialah {0}% daripada kos — langganan hanya bahagian kecil.", "vNone": "Tiada pelan standard yang menampung ini, jadi perlukan sebut harga khas. Yang paling hampir dipaparkan.", "vOut1": "{0} tersingkir: {1}", "vOutMany": "{0} tersingkir{1}.", "vPayg": "Pada volum ini {0} mungkin lebih murah daripada mana-mana langganan — berbaloi dilihat.", "vPinned": "Anda menyemat <b>{0}</b>.", "vPinnedBest": "Itu juga pelan termurah yang sesuai.", "vPinnedLess": "Yang termurah dan sesuai ialah <b>{0}</b> pada {1}, jadi ini {2} lebih murah sebulan.", "vPinnedMore": "Yang termurah dan sesuai ialah <b>{0}</b> pada {1}, jadi ini {2} lebih mahal sebulan.", "vTierUp": "{0} juga layak tetapi {1} lebih mahal sebulan: kadar setiap mesejnya lebih tinggi, dan pada volum ini itu mengatasi yuran pelan yang lebih rendah.", "voice": "Saya perlukan ejen AI suara", "voiceHint": "AI suara hanya pada Business: menanda ini menyingkirkan Growth dan Pro.", "wbPlain": "Kadar langsung gagal dimuatkan, jadi jumlah ini menggunakan kadar rujukan. Tekan Muat semula kadar pada panel sebelum memberi sebut harga.", "wbUsd": "Kadar langsung gagal dimuatkan. Caj mesej dibil dalam USD, jadi jumlah ini menggunakan kadar rujukan. Tekan Muat semula kadar pada panel sebelum memberi sebut harga.", "whNote": "Growth hanya mengendalikan peraturan kata kunci. Chatbot berbilang langkah dan langkah webhook bermula pada Pro.", "regionNote": "Pengebilan Singapura dalam dolar Singapura. Menggunakan kad kadar penggunaan Greater China."}};
+  var LANGS = {"zh-Hans": {"agentsAi": "需要几个 Astra AI 智能体", "agentsAiHint": "Growth 1 个，Pro 2 个，Business 不限。超出方案允许即排除该方案。", "and": "和", "aoBilled": "按 5 人一档计费", "aoFree": "本方案已包含", "aoLearn": "这是什么", "ao_apihigh": "API 高并发", "ao_apihigh_h": "瞬时上限最高每 10 秒 200 次 API 调用。", "ao_apilimit": "提升 API 月度上限", "ao_apilimit_h": "API 月度调用上限最高 4,000 万次。", "ao_blitz": "Blitz——每秒 200 条消息", "ao_blitz_h": "群发速度最高每秒 200 条，适用于时效性强的发送。", "ao_byoa": "BYOA——接入自有 AI 智能体", "ao_byoa_h": "接入第三方 AI 智能体，按智能体计费。Astra 智能体随方案提供，此处不计费。", "ao_ctwa": "点击直达 WhatsApp 广告", "ao_ctwa_h": "Facebook 与 Instagram 广告的点击追踪与归因，含分析看板与 Google Ads。Pro 起免费。", "ao_forms": "表单", "ao_forms_h": "最多 25 个 WhatsApp 表单，用于预约、申请与线索收集。", "ao_masking": "手机号码脱敏", "ao_masking_h": "在收件箱中对客户号码脱敏，通常出于合规考虑。", "ao_opprivacy": "坐席隐私保护", "ao_opprivacy_h": "在沟通过程中对坐席隐藏客户联系方式。", "ao_opscope": "坐席可见范围", "ao_opscope_h": "每位坐席只看到分配给自己的会话，而非整个共享收件箱。", "ao_roundrobin": "轮询分配会话", "ao_roundrobin_h": "把来访会话平均分配给在线坐席。", "b029": "每月前 1,000 条服务类消息", "b030": "来自点击直达 WhatsApp 广告的会话。", "b031": "2026 年 10 月 1 日起调整：", "b042": "Astra 智能体随方案提供", "b043": "共用一个额度池。", "b044": "额度不结转。", "b045": "加购起步 2,000。", "billedIn": "实际结算", "ccyBilling": "结算货币", "chanInc": "所有方案包含，无额外平台费", "chanNote": "本测算器仅核算 WhatsApp。其他渠道共用同一收件箱、自动化与 Astra 智能体；RCS 与 SMS 费率请单独索取。", "chanPaid": "同样支持，按条计费", "copied": "已复制——粘贴到邮件即可", "copyFail": "复制失败", "ctrlCcy": "价格显示货币", "ctrlCycle": "计费周期", "ctrlDetail": "说明", "ctrlLang": "语言", "ctrlTheme": "深色模式", "cycShown": "{0} · 以 {1} 显示", "cycSub_annual": "按年付费", "cycSub_monthly": "按月付费", "cycSub_quarterly": "按季付费", "cyc_annual": "按年", "cyc_monthly": "按月", "cyc_quarterly": "按季", "dg_addons": "附加功能", "dg_credits": "额外 Wati AI 额度", "dg_messages": "消息费用", "dg_numbers": "增购 WhatsApp 号码", "dg_plan": "方案费用", "dg_seats": "增购用户", "dg_triggers": "额外自动化触发", "discApplies": "适用于整个套餐——可单独修改下方任一行", "discEff": "占整单比例", "discLabel": "你可以给出的折扣", "discNet": "折后", "discOff": "让利", "discPerMonth": "每月", "discYear": "全年累计让利", "free": "免费", "fxAsOfDate": "2026 年 8 月 13 日", "fxBy": "汇率来自 {0}", "fxDated": "汇率日期 {0}", "fxLatest": "最新公布汇率", "fxLoading": "正在获取今日汇率…", "fxOffline": "无法获取实时汇率——正在使用 {0} 的参考汇率，请勿据此报价。", "fxRefresh": "刷新汇率", "grpAgent": "按 AI 智能体计费", "grpMonth": "按月固定费用", "grpRest": "其他国家和地区", "grpUser": "按用户计费，以 5 人为一档出售", "hintCountry": "{0} 方案下，发往{1}的营销类每条 {2}，实用类 {3}。切换国家，整单重新计价。", "hintNumber1": "一个号码，任何方案都支持。", "hintNumbers": "{0} 个号码：仅 Business 方案支持，首个之外每个每月另加 {1}。", "hintSeatsOk": "Growth 最多 3 个，Pro 与 Business 含 5 个。", "hintSeatsOver": "{0} 个坐席排除 Growth，它上限为 3。", "langLabel": "语言", "lede": "八个简短问题。账单随填写自动逐项列出，然后选择货币并导出 PDF。", "mixMsgs": "条/月", "mixNone": "在上方填入月发送量，构成图即显示在这里。", "mixSvc": "服务类", "mixT": "消息构成", "notesH": "这里的计算前提，供你核对。", "pAllIn": "每月总计", "pExtraSeats": "{0} 个额外坐席 {1}", "pMsgs": "消息 {0}，营销类单价 {1}", "pPlan": "方案 {0}", "pSeatsFixed": "含 {0} 个坐席，无法加购", "pSeatsInc": "含 {0} 个坐席", "pTrigOk": "{0} 次触发，够用", "pTrigTop": "触发加购 {0}（{1} 档）", "perAgent": "每个智能体", "perMonth": "每月", "perUser": "每用户", "q1note": "WhatsApp 按客户号码所属国家计费，而不是按你公司所在地。各市场费率差距很大，所以从这里开始。", "q7h": "AI、Astra 与额度", "q7n": "Astra 随所有方案提供。额度为一个共用池，超出部分按档位计价。", "q8h": "附加功能", "q8n": "价格直接取自本地区费率卡。按用户计费的附加功能以 5 人为一档，8 名坐席按 10 人计费。", "rAddon": "{0} 需要 {1} 及以上。", "rAgents1": "含 {0} 个 Astra 智能体，你需要 {1} 个。", "rAgentsN": "含 {0} 个 Astra 智能体，你需要 {1} 个。", "rAuth": "验证类消息", "rCap": "群发上限为每月 {0} 条，你的营销加实用类用量为 {1} 条。", "rCredits": "Wati AI 额度", "rExtraCredits": "额外 Wati AI 额度", "rExtraNumbers": "个增购 WhatsApp 号码", "rExtraTriggers": "额外自动化触发", "rExtraUsers": "个增购用户", "rMarketing": "营销类消息", "rMsgHead": "消息——从预付钱包扣除", "rMsgTotal": "钱包小计", "rNumbers": "仅支持一个 WhatsApp 号码，你需要 {0} 个。", "rPlan": "方案", "rSeats": "含 {0} 个坐席且无法加购，你需要 {1} 个。", "rService": "服务类消息", "rShopify": "Shopify 集成", "rSubHead": "订阅——按方案周期结算", "rSubTotal": "订阅小计", "rSvcFree": "服务类消息（免费额度内）", "rTriggers": "次触发", "rUsers": "用户", "rUtility": "实用类消息", "rVoice": "语音 AI 智能体仅限 Business。", "rcDate": "2026 年 10 月 1 日", "rcEffective": "自 {0} 起生效。", "rcFolder": "若链接打开的是文件夹，请按按钮上的文件名选择。", "rcHead": "这些数字背后的费率卡", "rnInr": "方案价格与单条费率均为印度卢比，无需换算。唯一例外是 Shopify 集成，按每月 4.99 美元计费。", "rnUsd": "费率卡上的单条费率以美元标示。若方案以其他货币结算，两者都会按今日汇率换算为上方所选货币。", "shopify": "接入 Shopify", "shopifyHint": "购物车挽回、货到付款确认与自动订单通知需要此项。每月 4.99 美元，按美元计费。", "srCountry": "你的客户所在国家", "srDetail": "显示说明文字", "srMsgs": "条/月", "svcLower": "服务类消息有各自的分国家费率，低于实用类。", "svcSame": "本费率卡的服务类消息按实用类费率计费。", "t001": "算清 WhatsApp 每月真正要花多少钱。", "t002": "你的客户在哪里？", "t003": "你用 WhatsApp 做什么？", "t004": "设定一组合理的起始数值，之后都可修改。", "t005": "促销与营销活动", "t006": "客户服务", "t007": "订单与物流通知", "t008": "登录与一次性验证码", "t009": "各种用途都有", "t010": "需要几个 WhatsApp 号码？", "t011": "多数企业一个号码就够。分设号码需要 Business，每增加一个按月收费。", "t012": "已接入 Wati 的号码数", "t013": "多少人需要账号？", "t014": "凡是回复会话的人都需要一个坐席。Growth 含 3 个，且无法加购。", "t015": "拥有 Wati 访问权限的成员", "t016": "每月多少条消息？", "t017": "WhatsApp 按送达消息的类别计费，不按联系人。把每月发送量分到三个收费类别。", "t018": "营销类", "t019": "优惠、新品、唤醒、购物车挽回。最贵的类别。", "t020": "实用类", "t021": "订单、物流、收款与预约提醒——一切与客户已完成交易相关的内容。", "t022": "验证类", "t023": "仅限一次性密码和登录验证码。", "t024": "每月服务类消息", "t025": "你方在 24 小时窗口内发出的自由格式回复。自 2026 年 10 月 1 日起，每月前 1,000 条之后按条计费。客户发来的始终免费。", "t026": "有哪些变化", "t027": "仍然不收费的部分", "t028": "客户发给你的任何内容都免费。", "t029": "，按每个 WhatsApp Business 账户计算，每月重置。", "t030": "目前免费。Meta 将把窗口延长至 7 天，日期待定。", "t031": "服务类消息改为按条计费，24 小时窗口内的实用类模板恢复计费。", "t032": "有多少流程是自动跑的？", "t033": "你设置的自动化每为一位客户触发一次即计一次：聊天机器人、关键词、路由规则、序列或 Flow。用完后自动化停止，直到你加购。超出部分按档位计价。", "t034": "触发次数如何计算与收费", "t035": "每月自动化触发次数", "t036": "大致为每位发起自动会话的客户一次，每条自动跟进再一次。API 发起的动作不计。", "t039": "每月 Wati AI 额度", "t040": "Wati AI 与 Astra 共用一个额度池。每月免费：Growth 2,000、Pro 5,000、Business 20,000。团队不用 AI 就保持 0。", "t041": "Astra 已包含在方案内，额度现已合并为一个池", "t042": "——Growth 1 个，Pro 2 个，Business 不限。语音 AI 仅限 Business。无需另行订阅 Astra。", "t043": "同一个余额覆盖 Wati AI 与 Astra。旧的 AI Co-pilot 额度已停用。", "t044": "在账单日失效并重置为方案额度。月中加购的也不结转。", "t045": "1,000 额度包已停售，每额度单价减半。", "t046": "套餐方案与 AI 额度的运作方式，含结转说明", "t047": "预计每月费用", "t048": "Wati Pro", "t049": "最佳匹配", "t050": "Growth", "t051": "Pro", "t052": "Business", "t053": "每月合计", "t054": "每条消息均价", "t055": "按年", "t056": "保存为 PDF", "t057": "复制为邮件", "t058": "同样的需求，三个方案分别计价", "t059": "把用户、加购与各方案消息费率算进去后，便宜的方案未必账单更便宜。", "t060": "方案、坐席与附加功能价格为官方公布数字。每条消息费率来自本地区费率卡，自 2026 年 10 月 1 日生效，按接收方国家计费。层级越高单条越便宜。", "t061": "费率卡链接在问题 1 下方——通话时打开原文，不要凭记忆报价。", "t062": "估算选出满足需求的最便宜方案。锁定某个方案可报更高层级；它承载不了的费用会从总额剔除并标注。", "t063": "Growth 的 15,000 条群发上限按营销加实用类核算。验证类由 API 一对一触发，不计入。", "t064": "方案含触发次数：1,000 / 2,000 / 5,000。超出按档位计价——支付覆盖所需的第一档。", "t065": "方案含 Wati AI 额度：2,000 / 5,000 / 20,000，Wati AI 与 Astra 共用。超出按档位计价且不结转。", "t066": "Astra 智能体随方案提供：1 / 2 / 不限，语音 AI 仅限 Business。并非单独订阅。", "t067": "增加号码需要 Business。Shopify 每月 4.99 美元，随汇率浮动。", "t068": "消息费用从预付钱包中扣除，与订阅发票分开结算。", "t069": "每月约一百万条以上的用量折扣未纳入模型。同样未计入：专属上线、技术客户经理、专业服务与绿勾认证。", "t070": "每月预计", "t071": "汇率取自 Frankfurter，备用为 Exchange Rate API。两者每日公布一次，因此为每日参考汇率而非成交汇率。Wati 以 结算；当日银行汇率会略有出入。", "tagNoFit": "不符合", "tagQuoting": "报价中", "toolname": "WhatsApp 成本测算器", "vCheapest": "<b>{0}</b> 是满足你需求的最便宜方案。", "vMsgShare": "消息占成本的 {0}%——订阅费只是小头。", "vNone": "标准方案都覆盖不了，需要单独报价。下面显示的是最接近的方案。", "vOut1": "{0} 被排除：{1}", "vOutMany": "{0} 被排除{1}。", "vPayg": "在这个用量下，{0} 可能比任何订阅都便宜，值得一看。", "vPinned": "你锁定了 <b>{0}</b>。", "vPinnedBest": "它也是符合条件里最便宜的。", "vPinnedLess": "符合条件里最便宜的是 <b>{0}</b>，{1}，所以这个每月便宜 {2}。", "vPinnedMore": "符合条件里最便宜的是 <b>{0}</b>，{1}，所以这个每月贵 {2}。", "vTierUp": "{0} 同样符合条件，但每月贵 {1}：它的单条费率更高，在这个用量下盖过了更低的方案费。", "voice": "我需要语音 AI 智能体", "voiceHint": "语音 AI 仅限 Business：勾选此项将排除 Growth 和 Pro。", "wbPlain": "实时汇率加载失败，总额使用了参考汇率。报价前请先在报价面板点击刷新汇率。", "wbUsd": "实时汇率加载失败。消息费按美元结算，总额使用了参考汇率。报价前请先在报价面板点击刷新汇率。", "whNote": "Growth 仅支持关键词规则。多步骤聊天机器人与 webhook 步骤自 Pro 起。", "regionNote": "新加坡以新元计费，采用大中华区用量费率卡。"}, "ms": {"agentsAi": "Ejen AI Astra yang anda perlukan", "agentsAiHint": "Growth 1, Pro 2, Business tanpa had. Minta lebih daripada yang dibenarkan pelan, pelan itu disingkirkan.", "and": "dan", "aoBilled": "dicaj dalam pek 5", "aoFree": "sudah termasuk dalam pelan ini", "aoLearn": "Apa fungsinya", "ao_apihigh": "API volum tinggi", "ao_apihigh_h": "Had lonjakan sehingga 200 panggilan API setiap 10 saat.", "ao_apilimit": "Kenaikan had API bulanan", "ao_apilimit_h": "Had API bulanan sehingga 40 juta panggilan.", "ao_blitz": "Blitz: 200 mesej sesaat", "ao_blitz_h": "Kelajuan hantar siaran sehingga 200 mesej sesaat, untuk penghantaran mendesak.", "ao_byoa": "BYOA — bawa ejen AI anda sendiri", "ao_byoa_h": "Sambungkan ejen AI pihak ketiga, dicaj setiap ejen. Ejen Astra disertakan dengan pelan dan tidak dicaj di sini.", "ao_ctwa": "Iklan Click-to-WhatsApp", "ao_ctwa_h": "Penjejakan dan atribusi klik iklan Facebook dan Instagram, dengan papan pemuka analitik dan Google Ads. Percuma mulai Pro.", "ao_forms": "Borang", "ao_forms_h": "Sehingga 25 borang WhatsApp untuk tempahan, permohonan dan penjanaan prospek.", "ao_masking": "Pelindungan nombor telefon", "ao_masking_h": "Melindungi nombor pelanggan dalam peti masuk. Biasanya atas sebab pematuhan.", "ao_opprivacy": "Privasi operator", "ao_opprivacy_h": "Menyembunyikan butiran hubungan pelanggan daripada operator semasa sembang.", "ao_opscope": "Skop operator", "ao_opscope_h": "Setiap operator melihat hanya sembang yang diberikan kepadanya, bukan seluruh peti masuk kongsi.", "ao_roundrobin": "Pemberian sembang bergilir", "ao_roundrobin_h": "Membahagikan sembang masuk sama rata kepada ejen yang ada.", "b029": "1,000 mesej perkhidmatan pertama sebulan", "b030": "Perbualan daripada iklan klik-ke-WhatsApp.", "b031": "Berubah pada 1 Oktober 2026:", "b042": "Ejen AI Astra disertakan dengan pelan", "b043": "Satu baki kredit.", "b044": "Kredit tidak dibawa ke hadapan.", "b045": "Tambah nilai bermula pada 2,000.", "billedIn": "dicaj dalam", "ccyBilling": "mata wang pengebilan", "chanInc": "Dalam setiap pelan, tanpa yuran platform tambahan", "chanNote": "Kalkulator ini mengira WhatsApp. Saluran lain berkongsi peti masuk, automasi dan ejen Astra yang sama — minta kadar RCS dan SMS secara berasingan.", "chanPaid": "Turut tersedia, dicaj setiap mesej", "copied": "Disalin — tampal ke e-mel anda", "copyFail": "Gagal menyalin", "ctrlCcy": "Tunjukkan harga dalam", "ctrlCycle": "Kitaran pengebilan", "ctrlDetail": "Butiran", "ctrlLang": "Bahasa", "ctrlTheme": "Mod gelap", "cycShown": "{0} · dipaparkan dalam {1}", "cycSub_annual": "pelan dicaj tahunan", "cycSub_monthly": "pelan dicaj bulanan", "cycSub_quarterly": "pelan dicaj suku tahunan", "cyc_annual": "Tahunan", "cyc_monthly": "Bulanan", "cyc_quarterly": "Suku tahunan", "dg_addons": "Add-on", "dg_credits": "Kredit Wati AI tambahan", "dg_messages": "Mesej", "dg_numbers": "Nombor WhatsApp tambahan", "dg_plan": "Yuran pelan", "dg_seats": "Pengguna tambahan", "dg_triggers": "Pencetus tambahan", "discApplies": "untuk keseluruhan pakej — ubah mana-mana baris di bawah", "discEff": "daripada bil", "discLabel": "Diskaun yang boleh anda tawarkan", "discNet": "selepas diskaun", "discOff": "Anda lepaskan", "discPerMonth": "sebulan", "discYear": "dilepaskan sepanjang setahun", "free": "Percuma", "fxAsOfDate": "13 Ogos 2026", "fxBy": "kadar daripada {0}", "fxDated": "kadar bertarikh {0}", "fxLatest": "kadar terbitan terkini", "fxLoading": "Mendapatkan kadar tukaran hari ini…", "fxOffline": "Kadar langsung tiada — menggunakan kadar rujukan bertarikh {0}. Jangan beri sebut harga daripada ini.", "fxRefresh": "Muat semula kadar", "grpAgent": "Setiap ejen AI", "grpMonth": "Bulanan, yuran tetap", "grpRest": "Negara lain", "grpUser": "Setiap pengguna, dijual dalam pek lima", "hintCountry": "Pada {0}, mesej pemasaran ke {1} berharga {2} dan utility {3}. Tukar negara, seluruh bil dikira semula.", "hintNumber1": "Satu nombor. Mana-mana pelan boleh.", "hintNumbers": "{0} nombor: hanya pelan Business menyokongnya, tambah {1} sebulan bagi setiap satu selepas yang pertama.", "hintSeatsOk": "Growth sehingga 3. Pro dan Business merangkumi 5.", "hintSeatsOver": "{0} pengguna menyingkirkan Growth, yang hadnya 3.", "langLabel": "Bahasa", "lede": "Lapan soalan ringkas. Bil memperincikan dirinya sendiri, kemudian pilih mata wang dan simpan sebagai PDF.", "mixMsgs": "mesej sebulan", "mixNone": "Isi volum bulanan di atas dan campurannya muncul di sini.", "mixSvc": "Perkhidmatan", "mixT": "Campuran mesej anda", "notesH": "Apa yang diandaikan di sini, untuk anda semak.", "pAllIn": "sebulan, semua sekali", "pExtraSeats": "{0} pengguna tambahan {1}", "pMsgs": "Mesej {0}, pemasaran pada {1}", "pPlan": "Pelan {0}", "pSeatsFixed": "{0} pengguna disertakan, tidak boleh ditambah", "pSeatsInc": "{0} pengguna disertakan", "pTrigOk": "{0} pencetus, cukup untuk anda", "pTrigTop": "Tambah nilai pencetus {0} (lapisan {1})", "perAgent": "setiap ejen", "perMonth": "sebulan", "perUser": "setiap pengguna", "q1note": "WhatsApp mengecaj mengikut negara nombor pelanggan anda, bukan tempat perniagaan anda. Kadar berbeza jauh antara pasaran, jadi mulakan di sini.", "q7h": "AI, Astra dan kredit", "q7n": "Astra disertakan dengan setiap pelan. Kredit ialah satu baki dikongsi; lebihan dihargakan mengikut lapisan.", "q8h": "Add-on", "q8n": "Harga terus daripada kad kadar rantau ini. Add-on setiap pengguna dijual dalam pek lima, jadi 8 operator dicaj sebagai 10.", "rAddon": "{0} memerlukan {1} atau ke atas.", "rAgents1": "Disertakan {0} ejen Astra; anda minta {1}.", "rAgentsN": "Disertakan {0} ejen Astra; anda minta {1}.", "rAuth": "Mesej pengesahan", "rCap": "Siaran dihadkan {0} sebulan; volum pemasaran campur utility anda {1}.", "rCredits": "kredit Wati AI", "rExtraCredits": "Kredit Wati AI tambahan", "rExtraNumbers": "nombor WhatsApp tambahan", "rExtraTriggers": "Pencetus automasi tambahan", "rExtraUsers": "pengguna tambahan", "rMarketing": "Mesej marketing", "rMsgHead": "Mesej — daripada dompet prabayar anda", "rMsgTotal": "Subjumlah dompet", "rNumbers": "Menyokong satu nombor WhatsApp sahaja; anda perlukan {0}.", "rPlan": "pelan", "rSeats": "Merangkumi {0} pengguna tanpa cara menambah — anda perlukan {1}.", "rService": "Mesej perkhidmatan", "rShopify": "Integrasi Shopify", "rSubHead": "Langganan — dicaj pada kitaran pelan anda", "rSubTotal": "Subjumlah langganan", "rSvcFree": "Mesej perkhidmatan, kuota percuma", "rTriggers": "pencetus", "rUsers": "pengguna", "rUtility": "Mesej utility", "rVoice": "Ejen AI suara hanya pada Business.", "rcDate": "1 Oktober 2026", "rcEffective": "Berkuat kuasa {0}.", "rcFolder": "Jika pautan membuka folder, pilih fail yang dinamakan pada butang.", "rcHead": "Kad kadar di sebalik angka ini", "rnInr": "Harga pelan dan kadar setiap mesej kedua-duanya dalam INR, jadi tiada penukaran. Kecualinya integrasi Shopify, dibil $4.99 sebulan dalam USD.", "rnUsd": "Kadar setiap mesej pada kad kadar dinyatakan dalam USD. Jika pelan dibil dalam mata wang lain, kedua-duanya ditukar kepada mata wang yang dipilih di atas, pada kadar hari ini.", "shopify": "Sambungkan Shopify", "shopifyHint": "Perlu untuk troli terbiar, pengesahan COD dan makluman pesanan automatik. $4.99 sebulan dalam USD.", "srCountry": "Negara tempat pelanggan anda berada", "srDetail": "Tunjukkan nota penerangan", "srMsgs": " mesej sebulan", "svcLower": "Mesej perkhidmatan mempunyai kadar tersendiri mengikut negara, lebih rendah daripada utility.", "svcSame": "Pada kad kadar ini mesej perkhidmatan dicaj pada kadar utility.", "t001": "Kira berapa kos sebenar WhatsApp setiap bulan.", "t002": "Di manakah pelanggan anda?", "t003": "Untuk apa anda guna WhatsApp?", "t004": "Menetapkan angka permulaan yang munasabah. Semuanya masih boleh diubah.", "t005": "Promosi dan kempen", "t006": "Sokongan pelanggan", "t007": "Makluman pesanan dan penghantaran", "t008": "Log masuk dan OTP", "t009": "Campuran semuanya", "t010": "Berapa nombor WhatsApp?", "t011": "Satu nombor memadai untuk kebanyakan perniagaan. Nombor berasingan perlukan Business, setiap tambahan dicaj bulanan.", "t012": "Nombor yang disambungkan ke Wati", "t013": "Berapa ramai yang perlukan akses?", "t014": "Semua yang menjawab sembang perlukan satu lesen. Growth merangkumi 3 dan tidak boleh ditambah pada apa jua harga.", "t015": "Ahli pasukan dengan akses Wati", "t016": "Berapa mesej sebulan?", "t017": "WhatsApp mengecaj setiap mesej dihantar mengikut kategori, bukan mengikut kenalan. Bahagikan volum bulanan kepada tiga kategori berkos.", "t018": "Marketing", "t019": "Tawaran, pelancaran, penglibatan semula, troli terbiar. Kategori paling mahal.", "t020": "Utility", "t021": "Makluman pesanan, penghantaran, bayaran dan temu janji — semua yang berkait transaksi yang sudah berlaku.", "t022": "Pengesahan", "t023": "Kata laluan sekali guna dan kod log masuk sahaja.", "t024": "Mesej perkhidmatan sebulan", "t025": "Balasan bebas yang anda hantar dalam tetingkap 24 jam. Dicaj setiap mesej mulai 1 Okt 2026, selepas 1,000 pertama sebulan. Mesej masuk sentiasa percuma.", "t026": "Apa yang berubah", "t027": "Apa yang masih tidak dicaj", "t028": "Apa sahaja yang pelanggan hantar kepada anda adalah percuma.", "t029": ", bagi setiap akaun WhatsApp Business, ditetapkan semula setiap bulan.", "t030": "Percuma buat masa ini. Meta akan memanjangkan tetingkap kepada 7 hari; tarikh menyusul.", "t031": "mesej perkhidmatan mula dicaj setiap mesej, dan templat utility dalam tetingkap 24 jam dicaj semula.", "t032": "Berapa banyak yang berjalan automatik?", "t033": "Dikira setiap kali automasi anda berjalan untuk seorang pelanggan: chatbot, kata kunci, peraturan penghalaan, jujukan atau Flow. Jika habis, automasi berhenti sehingga anda tambah nilai. Tambahan dihargakan mengikut lapisan.", "t034": "Cara pencetus dikira dan dicaj", "t035": "Pencetus automasi sebulan", "t036": "Lebih kurang satu bagi setiap pelanggan yang memulakan sembang automatik, tambah satu bagi setiap susulan automatik. Tindakan API tidak dikira.", "t039": "Kredit Wati AI sebulan", "t040": "Satu baki dikongsi Wati AI dan Astra. Percuma sebulan: 2,000 Growth, 5,000 Pro, 20,000 Business. Biar 0 jika pasukan tidak guna AI.", "t041": "Astra sudah termasuk, dan kredit kini satu baki", "t042": "— 1 pada Growth, 2 pada Pro, tanpa had pada Business. AI suara hanya Business. Tiada langganan Astra berasingan.", "t043": "satu baki menampung Wati AI dan Astra. Kredit AI Co-pilot lama telah ditamatkan.", "t044": "luput pada tarikh pengebilan dan kembali kepada jumlah pelan. Tambah nilai juga tidak dibawa ke hadapan.", "t045": "pakej 1,000 kredit sudah tiada dan harga setiap kredit turun separuh.", "t046": "Cara pelan bundel dan kredit AI berfungsi, termasuk baki terkumpul", "t047": "Anggaran kos bulanan", "t048": "Wati Pro", "t049": "Paling sesuai", "t050": "Growth", "t051": "Pro", "t052": "Business", "t053": "Jumlah sebulan", "t054": "Purata setiap mesej", "t055": "Tahunan", "t056": "Simpan sebagai PDF", "t057": "Salin untuk e-mel", "t058": "Keperluan yang sama, dihargakan pada ketiga-tiga pelan", "t059": "Pelan lebih murah tidak semestinya bil lebih murah setelah pengguna, tambah nilai dan kadar setiap pelan dikira.", "t060": "Harga pelan, lesen dan add-on ialah angka rasmi. Kadar setiap mesej daripada kad kadar rantau ini, berkuat kuasa 1 Oktober 2026, mengikut negara penerima. Peringkat lebih tinggi lebih murah setiap mesej.", "t061": "Kad kadar dipautkan di soalan 1 — buka sumbernya semasa panggilan, jangan memetik daripada ingatan.", "t062": "Anggaran memilih pelan termurah yang sesuai. Semat satu pelan untuk menawarkan lebih tinggi; yang tidak tertanggung dikeluarkan daripada jumlah dan ditandakan.", "t063": "Had 15,000 siaran Growth disemak terhadap marketing campur utility. Pengesahan dicetus API satu per satu dan tidak dikira.", "t064": "Pencetus disertakan: 1,000 / 2,000 / 5,000. Tambahan mengikut lapisan — anda bayar lapisan pertama yang menampung.", "t065": "Kredit Wati AI disertakan: 2,000 / 5,000 / 20,000, satu baki Wati AI dan Astra. Tambahan mengikut lapisan dan tidak dibawa ke hadapan.", "t066": "Ejen Astra disertakan dengan pelan: 1 / 2 / tanpa had, AI suara pada Business sahaja. Bukan langganan berasingan.", "t067": "Nombor tambahan perlukan Business. Shopify $4.99 sebulan dalam USD, jadi ia ikut kadar tukaran.", "t068": "Caj mesej diambil daripada dompet prabayar, berasingan daripada invois langganan.", "t069": "Diskaun volum melebihi kira-kira sejuta mesej sebulan tidak dimodelkan. Turut dikecualikan: onboarding khusus, pengurusan akaun teknikal, perkhidmatan profesional dan pengesahan tanda hijau.", "t070": "Anggaran bulanan", "t071": "Kadar tukaran daripada Frankfurter, sandarannya Exchange Rate API. Kedua-duanya terbit sekali sehari, jadi ini kadar rujukan harian, bukan kadar urus niaga. Wati mengebil dalam ; kadar bank anda pada hari itu akan berbeza sedikit.", "tagNoFit": "Tidak sesuai", "tagQuoting": "Disebut harga", "toolname": "Kalkulator kos WhatsApp", "vCheapest": "<b>{0}</b> ialah pelan termurah yang memenuhi keperluan anda.", "vMsgShare": "Mesej ialah {0}% daripada kos — langganan hanya bahagian kecil.", "vNone": "Tiada pelan standard yang menampung ini, jadi perlukan sebut harga khas. Yang paling hampir dipaparkan.", "vOut1": "{0} tersingkir: {1}", "vOutMany": "{0} tersingkir{1}.", "vPayg": "Pada volum ini {0} mungkin lebih murah daripada mana-mana langganan — berbaloi dilihat.", "vPinned": "Anda menyemat <b>{0}</b>.", "vPinnedBest": "Itu juga pelan termurah yang sesuai.", "vPinnedLess": "Yang termurah dan sesuai ialah <b>{0}</b> pada {1}, jadi ini {2} lebih murah sebulan.", "vPinnedMore": "Yang termurah dan sesuai ialah <b>{0}</b> pada {1}, jadi ini {2} lebih mahal sebulan.", "vTierUp": "{0} juga layak tetapi {1} lebih mahal sebulan: kadar setiap mesejnya lebih tinggi, dan pada volum ini itu mengatasi yuran pelan yang lebih rendah.", "voice": "Saya perlukan ejen AI suara", "voiceHint": "AI suara hanya pada Business: menanda ini menyingkirkan Growth dan Pro.", "wbPlain": "Kadar langsung gagal dimuatkan, jadi jumlah ini menggunakan kadar rujukan. Tekan Muat semula kadar pada panel sebelum memberi sebut harga.", "wbUsd": "Kadar langsung gagal dimuatkan. Caj mesej dibil dalam USD, jadi jumlah ini menggunakan kadar rujukan. Tekan Muat semula kadar pada panel sebelum memberi sebut harga.", "whNote": "Growth hanya mengendalikan peraturan kata kunci. Chatbot berbilang langkah dan langkah webhook bermula pada Pro.", "regionNote": "Pengebilan Singapura dalam dolar Singapura. Menggunakan kad kadar penggunaan Greater China."}};
   var LANG_NAMES = { en:"English", es:"Espa\u00f1ol", pt:"Portugu\u00eas",
     id:"Bahasa Indonesia", ms:"Bahasa Melayu", "zh-Hans":"\u7b80\u4f53\u4e2d\u6587",
     "zh-Hant":"\u7e41\u9ad4\u4e2d\u6587", de:"Deutsch", fr:"Fran\u00e7ais" };
@@ -1695,6 +1752,20 @@
     else if (wide.addListener) wide.addListener(place);
   })();
 
+  // Details: off is the working view for a live call; on is the full explanation.
+  (function(){
+    var btn = $("detailBtn"), root = document.documentElement;
+    function set(on, save){
+      root.setAttribute("data-detail", on ? "on" : "off");
+      btn.setAttribute("aria-checked", String(on));
+      if (save){ try { localStorage.setItem("wati-detail", on ? "on" : "off"); } catch(e){} }
+    }
+    set(root.getAttribute("data-detail") === "on", false);
+    btn.addEventListener("click", function(){
+      set(root.getAttribute("data-detail") !== "on", true);
+    });
+  })();
+
   (function(){
     var btn = $("themeBtn"), root = document.documentElement;
     function sync(){
@@ -1811,16 +1882,18 @@
       if (!items.length) return;
       var h = document.createElement("p");
       h.className = "s-head"; h.textContent = g[1]; host.appendChild(h);
+      var grid = document.createElement("div"); grid.className = "ao-grid";
+      host.appendChild(grid);
       items.forEach(function(a){
         var hint = document.createElement("span");
-        hint.className = "hint";
-        hint.appendChild(document.createTextNode(T("ao_" + a.k + "_h", a.hint) + " "));
+        hint.className = "hint ex";
+        hint.appendChild(document.createTextNode(T("ao_" + a.k + "_h", a.hint)));
         var link = null;
         if (a.url){
           link = document.createElement("a");
+          link.className = "ao-link";
           link.href = a.url; link.target = "_blank"; link.rel = "noopener";
           link.textContent = T("aoLearn","What this does");
-          hint.appendChild(link);
         }
         var lab, rec = { a:a, hint:hint, link:link };
 
@@ -1832,6 +1905,7 @@
           lab.className = "field-label stack";
           lab.setAttribute("for", "ad_" + a.k);
           lab.appendChild(document.createTextNode(""));
+          if (link) lab.appendChild(link);
           lab.appendChild(hint);
           var num = document.createElement("input");
           num.className = "num"; num.type = "number"; num.id = "ad_" + a.k;
@@ -1846,7 +1920,7 @@
           });
           rec.el = lab; rec.note = note;
           ADDON_LABELS.push(rec);
-          host.appendChild(field);
+          grid.appendChild(field);
         } else {
           var row = document.createElement("div"); row.className = "check";
           var cb = document.createElement("input");
@@ -1855,12 +1929,14 @@
           var box = document.createElement("div");
           lab = document.createElement("label");
           lab.setAttribute("for", cb.id);
-          box.appendChild(lab); box.appendChild(hint);
+          box.appendChild(lab);
+          if (link) box.appendChild(link);
+          box.appendChild(hint);
           row.appendChild(cb); row.appendChild(box);
           cb.addEventListener("change", function(){ state.addons[a.k] = cb.checked ? 1 : 0; render(); });
           rec.el = lab;
           ADDON_LABELS.push(rec);
-          host.appendChild(row);
+          grid.appendChild(row);
         }
       });
     });
@@ -1962,7 +2038,7 @@
       a.target = "_blank"; a.rel = "noopener";
       a.appendChild(document.createTextNode(it.label + " "));
       var s = document.createElement("span");
-      s.textContent = it.card;
+      s.className = "rc-file"; s.textContent = it.card;
       a.appendChild(s);
       li.appendChild(a); ul.appendChild(li);
     });
@@ -2135,6 +2211,7 @@
       var was = T("t057","Copy for email");
       btn.textContent = ok ? T("copied","Copied — paste into your email")
                            : T("copyFail","Copy failed");
+      if (ok && window.__track) window.__track("copy");
       setTimeout(function(){ btn.textContent = was; }, 2200);
     }
     function plainOnly(){
@@ -2164,6 +2241,52 @@
   rebuildCcyOptions();
   render();
   fetchRates();
+
+  /* ============================================================
+     Usage tracking
+     Anonymous counts, so the team can see which calculators get used.
+     The payload carries the region, the event and two random ids kept in
+     this browser — never the volumes, prices or anything a customer typed.
+     ============================================================ */
+  (function(){
+    var URL = "https://script.google.com/macros/s/AKfycbz45ERWViNfVOAWMxIVZ2fWNN9pw22ldBNz0yJN26U3Y47lpVhevT3xLDZk7EmHTik/exec";
+    if (URL.indexOf("https://") !== 0) return;      // not configured: stay silent
+
+    function anonId(store, key){
+      try {
+        var v = store.getItem(key);
+        if (!v){
+          v = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+          store.setItem(key, v);
+        }
+        return v;
+      } catch(e){ return ""; }                      // private window, blocked storage
+    }
+    var visitor = anonId(window.localStorage, "wati-calc-visitor");
+    var session = anonId(window.sessionStorage, "wati-calc-session");
+
+    window.__track = function(event){
+      var body = JSON.stringify({
+        region: CONFIG.region,
+        event: event,
+        visitor: visitor,
+        session: session,
+        lang: LANG,
+        ccy: state.outCcy
+      });
+      try {
+        // A beacon so it still lands when the tab closes; text/plain keeps it a
+        // simple request, so Apps Script never sees a CORS preflight.
+        if (navigator.sendBeacon){
+          navigator.sendBeacon(URL, new Blob([body], { type: "text/plain;charset=utf-8" }));
+        } else {
+          fetch(URL, { method: "POST", mode: "no-cors", keepalive: true,
+            headers: { "Content-Type": "text/plain;charset=utf-8" }, body: body });
+        }
+      } catch(e){}                                   // tracking never breaks the page
+    };
+    window.__track("view");
+  })();
 })();
 </script>
 </body>
